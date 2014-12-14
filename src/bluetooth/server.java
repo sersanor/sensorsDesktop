@@ -135,7 +135,7 @@ public void checkStatus() throws InterruptedException{
 
         public void run() {
             try {
-                dataThread.sleep(5000);
+                
                 byte[] buffer = new byte[1024];
                 int bytes_read = 0;
                 while ((bytes_read=input.read(buffer)) != -1) {
@@ -144,8 +144,6 @@ public void checkStatus() throws InterruptedException{
                     updateConsole(received);
                 }
             } catch (IOException ex) {
-                Logger.getLogger(server.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (InterruptedException ex) {
                 Logger.getLogger(server.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
