@@ -5,9 +5,27 @@
  */
 package uipackage;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartFrame;
+import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.LineAndShapeRenderer;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
 
 /**
  *
@@ -15,11 +33,38 @@ import org.jfree.chart.JFreeChart;
  */
 public class MainFrame extends javax.swing.JFrame {
 
+    Grafica g;
+
     /**
      * Creates new form MainFrame
      */
     public MainFrame() {
         initComponents();
+        console.getDocument().addDocumentListener(new DocumentListener() {
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                if (g != null) {
+                    try {
+                        //TEXTO MODIFICADO
+                        int last = console.getLineCount() - 1;
+                        String[] lines = console.getText().split("\\n");;
+                        g.updateData(lines[last-1]);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+            }
+
+        });
     }
 
     /**
@@ -42,6 +87,7 @@ public class MainFrame extends javax.swing.JFrame {
         s_name = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         s_addr = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -92,6 +138,13 @@ public class MainFrame extends javax.swing.JFrame {
         s_addr.setFont(new java.awt.Font("Tahoma", 2, 14)); // NOI18N
         s_addr.setText("00:00:00:00:00.");
 
+        jButton1.setText("jButton1");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -116,13 +169,15 @@ public class MainFrame extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(s_name, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(s_status))
-                            .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel7)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(s_addr, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                .addComponent(s_addr, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jButton1)
+                                    .addComponent(s_status))))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 55, Short.MAX_VALUE)))
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 352, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -147,13 +202,22 @@ public class MainFrame extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel2)
                             .addComponent(s_status))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 82, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 41, Short.MAX_VALUE)
+                        .addComponent(jButton1)
+                        .addGap(18, 18, 18)
                         .addComponent(chart_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+
+        g = new Grafica("Grafica Tiempo Real");
+        g.showGrafica();
+
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     public void run() {
         /* Set the Nimbus look and feel */
@@ -180,34 +244,36 @@ public class MainFrame extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-  
-                     java.awt.EventQueue.invokeLater(new Runnable() {
+        java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new MainFrame().setVisible(true);
             }
         });
     }
-    public void writeConsole(String s){
+
+    public void writeConsole(String s) {
         this.console.append(s);
         console.setCaretPosition(console.getDocument().getLength());
     }
-    public void clearConsole(){
+
+    public void clearConsole() {
         this.console.setText("");
+        if(g!=null)g.frame.setVisible(false);
     }
-    
-    public void setServerAdd(String s){
+
+    public void setServerAdd(String s) {
         this.s_addr.setText(s);
     }
-    public void setServerName(String s){
+
+    public void setServerName(String s) {
         this.s_name.setText(s);
-   }
-    
-    public void setStatus(boolean s){
-        if(s){
+    }
+
+    public void setStatus(boolean s) {
+        if (s) {
             this.s_status.setText("CONNECTED");
             this.s_status.setForeground(Color.blue);
-        }
-        else{
+        } else {
             this.s_status.setText("DISCONNECTED");
             this.s_status.setForeground(Color.red);
         }
@@ -216,6 +282,7 @@ public class MainFrame extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel chart_panel;
     private javax.swing.JTextArea console;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -226,4 +293,90 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel s_name;
     private javax.swing.JLabel s_status;
     // End of variables declaration//GEN-END:variables
+
+    public class Grafica{
+
+        DefaultCategoryDataset data;
+        JFreeChart chart;
+        ChartFrame frame;
+        private int X, Y, Z;
+        private static final String datosx = "X";
+        private static final String datosy = "Y";
+        private static final String datosz = "Z";
+
+        public Grafica(String title) {
+            setName("GRAPH THREAD");
+            X = Y = Z = 0;
+            data = new DefaultCategoryDataset();
+            // X
+            data.addValue(0.0, datosx, Integer.toString(X));
+
+            // Y
+            data.addValue(0.0, datosy, Integer.toString(Y));
+
+            // Z
+            data.addValue(0.0, datosz, Integer.toString(Z));
+
+            chart = ChartFactory.createLineChart(
+                    title, // chart title
+                    "Seconds", // domain axis label
+                    "Value", // range axis label
+                    data, // data
+                    PlotOrientation.VERTICAL, // orientation
+                    true, // include legend
+                    true, // tooltips
+                    false // urls
+            );
+            chart.setBackgroundPaint(Color.white);
+            final CategoryPlot plot = (CategoryPlot) chart.getPlot();
+            plot.setBackgroundPaint(Color.lightGray);
+            plot.setRangeGridlinePaint(Color.white);
+
+            // customise the range axis...
+            final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+            rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+            rangeAxis.setAutoRangeIncludesZero(true);
+            final LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot.getRenderer();
+//        renderer.setDrawShapes(true);
+
+            renderer.setSeriesStroke(
+                    0, new BasicStroke(
+                            2.0f
+                    )
+            );
+            renderer.setSeriesStroke(
+                    1, new BasicStroke(
+                            2.0f
+                    )
+            );
+            renderer.setSeriesStroke(
+                    2, new BasicStroke(
+                            2.0f
+                    )
+            );
+        }
+
+        public void showGrafica() {
+            frame = new ChartFrame("EJEMPLO X", chart);
+            frame.pack();
+            frame.setVisible(true);
+            frame.setSize(450, 500);
+
+        }
+
+        public void updateData(String values) throws InterruptedException {
+            if(values.length() > 1){
+            String delims = "[ ]+";
+            values = values.replace(",", ".");
+            String[] tokens = values.split(delims);
+            data.addValue(Double.parseDouble(tokens[1]), datosx, Integer.toString(X + 1));
+            data.addValue(Double.parseDouble(tokens[3]), datosy, Integer.toString(Y + 1));
+            data.addValue(Double.parseDouble(tokens[5]), datosz, Integer.toString(Z + 1));
+            X += 1;
+            Y += 1;
+            Z += 1;
+           //frame.repaint();
+            }
+        }
+    }
 }
