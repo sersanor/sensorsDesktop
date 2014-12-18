@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.Timer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.bluetooth.LocalDevice;
@@ -43,7 +44,7 @@ public class server extends Thread {
     private InputStreamReader daf;
     private BufferedReader sd;
     private RemoteDevice dev;
-    
+
     // UI
     public static MainFrame GUI;
 
@@ -55,7 +56,6 @@ public class server extends Thread {
             System.out.println("Serverted:\n"
                     + local.getBluetoothAddress()
                     + "\n" + local.getFriendlyName());
-
         } catch (Exception e) {
 
         }
@@ -77,15 +77,16 @@ public class server extends Thread {
             } catch (IOException ex) {
                 Logger.getLogger(server.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
+
         } catch (InterruptedException ex) {
             Logger.getLogger(server.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
-public void checkStatus() throws InterruptedException{
-    dataThread dThread = new dataThread(dis);
-    dThread.start();
+
+    public void checkStatus() throws InterruptedException {
+        dataThread dThread = new dataThread(dis);
+        dThread.start();
         try {
             dThread.join();
         } catch (InterruptedException ex) {
@@ -93,8 +94,8 @@ public void checkStatus() throws InterruptedException{
             setState(SERVING);
             this.sleep(3000);
         }
-}
-    
+    }
+
     public void newServer() {
         try {
             UUID uuid = new UUID(MY_UUID, false);
@@ -107,15 +108,20 @@ public void checkStatus() throws InterruptedException{
             daf = new InputStreamReader(System.in);
             sd = new BufferedReader(daf);
             dev = RemoteDevice.getRemoteDevice(con);
-            System.out.println("Remote device address: " + dev.getBluetoothAddress());
-            System.out.println("Remote device name: " + dev.getFriendlyName(true));
+            String add = dev.getBluetoothAddress();
+            String name = dev.getFriendlyName(true);
+            System.out.println("Remote device address: " + add);
+            System.out.println("Remote device name: " + name);
             setState(SERVING);
+            // GUI LABELS UPDATE
             GUI.setStatus(true);
+            GUI.setDevName(add);
+            GUI.setDevAdd(name);
         } catch (IOException e) {
             System.err.print(e.toString());
             this.interrupt();
         }
-       
+
     }
 
     public void disconnect() {
@@ -125,7 +131,7 @@ public void checkStatus() throws InterruptedException{
 
     private class dataThread extends Thread {
 
-    private InputStream input;
+        private InputStream input;
 
         private dataThread(InputStream dis) {
             setName("DATA THREAD");
@@ -135,10 +141,9 @@ public void checkStatus() throws InterruptedException{
 
         public void run() {
             try {
-                
                 byte[] buffer = new byte[1024];
                 int bytes_read = 0;
-                while ((bytes_read=input.read(buffer)) != -1) {
+                while ((bytes_read = input.read(buffer)) != -1) {
                     String received = new String(buffer, 0, bytes_read);
                     System.out.println("Message: " + received);
                     updateConsole(received);
@@ -147,8 +152,9 @@ public void checkStatus() throws InterruptedException{
                 Logger.getLogger(server.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        public void updateConsole(String cad){
-            GUI.writeConsole(cad+"\n");
+
+        public void updateConsole(String cad) {
+            GUI.writeConsole(cad + "\n");
         }
 
     }

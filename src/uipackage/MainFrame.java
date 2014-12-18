@@ -5,10 +5,13 @@
  */
 package uipackage;
 
+import static com.intel.bluetooth.RemoteDeviceHelper.readRSSI;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.bluetooth.RemoteDevice;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.event.DocumentEvent;
@@ -49,7 +52,7 @@ public class MainFrame extends javax.swing.JFrame {
                         //TEXTO MODIFICADO
                         int last = console.getLineCount() - 1;
                         String[] lines = console.getText().split("\\n");;
-                        g.updateData(lines[last-1]);
+                        g.updateData(lines[last - 1]);
                     } catch (InterruptedException ex) {
                         Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -79,8 +82,6 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         console = new javax.swing.JTextArea();
-        chart_panel = new javax.swing.JPanel();
-        jLabel3 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         s_status = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
@@ -88,8 +89,16 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel7 = new javax.swing.JLabel();
         s_addr = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        jLabel6 = new javax.swing.JLabel();
+        d_name = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        d_addr = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Bluetooth Server");
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        setForeground(java.awt.Color.white);
+        setResizable(false);
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
         jLabel1.setText("FMM DESKTOP APP");
@@ -99,37 +108,18 @@ public class MainFrame extends javax.swing.JFrame {
         console.setRows(5);
         jScrollPane1.setViewportView(console);
 
-        jLabel3.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jLabel3.setText("- GRAPHIC -");
-
-        javax.swing.GroupLayout chart_panelLayout = new javax.swing.GroupLayout(chart_panel);
-        chart_panel.setLayout(chart_panelLayout);
-        chart_panelLayout.setHorizontalGroup(
-            chart_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(chart_panelLayout.createSequentialGroup()
-                .addGap(172, 172, 172)
-                .addComponent(jLabel3)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        chart_panelLayout.setVerticalGroup(
-            chart_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(chart_panelLayout.createSequentialGroup()
-                .addComponent(jLabel3)
-                .addGap(0, 250, Short.MAX_VALUE))
-        );
-
         jLabel2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel2.setText("STATUS:");
+        jLabel2.setText("CON. STATUS:");
 
         s_status.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         s_status.setForeground(new java.awt.Color(255, 0, 0));
-        s_status.setText("DISCONNECT");
+        s_status.setText("DISCONNECTED");
 
         jLabel5.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel5.setText("SERVER NAME:");
 
         s_name.setFont(new java.awt.Font("Tahoma", 2, 14)); // NOI18N
-        s_name.setText("TEST TEST");
+        s_name.setText("SERVER_NAME.");
         s_name.setToolTipText("");
 
         jLabel7.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
@@ -138,12 +128,25 @@ public class MainFrame extends javax.swing.JFrame {
         s_addr.setFont(new java.awt.Font("Tahoma", 2, 14)); // NOI18N
         s_addr.setText("00:00:00:00:00.");
 
-        jButton1.setText("jButton1");
+        jButton1.setText("SHOW GRAPH");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
             }
         });
+
+        jLabel6.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel6.setText("DEVICE NAME:");
+
+        d_name.setFont(new java.awt.Font("Tahoma", 2, 14)); // NOI18N
+        d_name.setText("DEVICE_NAME.");
+        d_name.setToolTipText("");
+
+        jLabel8.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel8.setText("DEVICE ADDR:");
+
+        d_addr.setFont(new java.awt.Font("Tahoma", 2, 14)); // NOI18N
+        d_addr.setText("00:00:00:00:00.");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -152,33 +155,35 @@ public class MainFrame extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addGap(25, 25, 25)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(chart_panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(116, 116, 116)
-                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 246, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(128, 128, 128)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel5)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(s_name, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel7)
+                                .addComponent(jLabel8)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(s_addr, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(d_addr, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(jLabel6)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(d_name, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel5)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(s_name, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel7)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(s_addr, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jLabel1)))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel2)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jButton1)
-                                    .addComponent(s_status))))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 55, Short.MAX_VALUE)))
+                                .addComponent(s_status))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(102, 102, 102)
+                        .addComponent(jButton1)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 6, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 352, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -186,11 +191,11 @@ public class MainFrame extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
-                        .addGap(54, 54, 54)
+                        .addGap(42, 42, 42)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel7)
                             .addComponent(s_addr))
@@ -198,15 +203,21 @@ public class MainFrame extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel5)
                             .addComponent(s_name))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel2)
                             .addComponent(s_status))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 41, Short.MAX_VALUE)
-                        .addComponent(jButton1)
-                        .addGap(18, 18, 18)
-                        .addComponent(chart_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                        .addGap(9, 9, 9)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel8)
+                            .addComponent(d_addr))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel6)
+                            .addComponent(d_name))
+                        .addGap(61, 61, 61)
+                        .addComponent(jButton1)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -247,6 +258,7 @@ public class MainFrame extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new MainFrame().setVisible(true);
+
             }
         });
     }
@@ -258,7 +270,19 @@ public class MainFrame extends javax.swing.JFrame {
 
     public void clearConsole() {
         this.console.setText("");
-        if(g!=null)g.frame.setVisible(false);
+        if (g != null) {
+            g.frame.setVisible(false);
+        }
+        this.d_addr.setText("00:00:00:00:00.");
+        this.d_name.setText("DEVICE_NAME");
+    }
+
+    public void setDevName(String s) {
+        this.d_name.setText(s);
+    }
+
+    public void setDevAdd(String s) {
+        this.d_addr.setText(s);
     }
 
     public void setServerAdd(String s) {
@@ -280,21 +304,23 @@ public class MainFrame extends javax.swing.JFrame {
     }
     private JFreeChart Grafica;
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel chart_panel;
     private javax.swing.JTextArea console;
+    private javax.swing.JLabel d_addr;
+    private javax.swing.JLabel d_name;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel s_addr;
     private javax.swing.JLabel s_name;
     private javax.swing.JLabel s_status;
     // End of variables declaration//GEN-END:variables
 
-    public class Grafica{
+    public class Grafica {
 
         DefaultCategoryDataset data;
         JFreeChart chart;
@@ -365,17 +391,17 @@ public class MainFrame extends javax.swing.JFrame {
         }
 
         public void updateData(String values) throws InterruptedException {
-            if(values.length() > 1){
-            String delims = "[ ]+";
-            values = values.replace(",", ".");
-            String[] tokens = values.split(delims);
-            data.addValue(Double.parseDouble(tokens[1]), datosx, Integer.toString(X + 1));
-            data.addValue(Double.parseDouble(tokens[3]), datosy, Integer.toString(Y + 1));
-            data.addValue(Double.parseDouble(tokens[5]), datosz, Integer.toString(Z + 1));
-            X += 1;
-            Y += 1;
-            Z += 1;
-           //frame.repaint();
+            if (values.length() > 1) {
+                String delims = "[ ]+";
+                values = values.replace(",", ".");
+                String[] tokens = values.split(delims);
+                data.addValue(Double.parseDouble(tokens[1]), datosx, Integer.toString(X + 1));
+                data.addValue(Double.parseDouble(tokens[3]), datosy, Integer.toString(Y + 1));
+                data.addValue(Double.parseDouble(tokens[5]), datosz, Integer.toString(Z + 1));
+                X += 1;
+                Y += 1;
+                Z += 1;
+                //frame.repaint();
             }
         }
     }
