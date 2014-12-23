@@ -36,23 +36,34 @@ import org.jfree.data.general.DefaultPieDataset;
  */
 public class MainFrame extends javax.swing.JFrame {
 
-    Grafica g;
+    Grafica g = null;
+    // SENSORS CONSTANTS
+    static final int ACCELEROMETER = 1;
+    static final int LIGHT = 2;
+    static final int ORIENTATION = 3;
+    static final int PROXIMITY = 4;
+    static final int TEMPERATURE = 5;
+    static final int GYROSCOPE = 6;
+    static final int SOUND = 7;
+    static final int MAGNETIC = 8;
+    static final int PRESSURE = 9;
+    public int sensorNumber = 0;
 
     /**
      * Creates new form MainFrame
      */
     public MainFrame() {
         initComponents();
-        console.getDocument().addDocumentListener(new DocumentListener() {
+        console.getDocument().addDocumentListener(new DocumentListener() { // LISTENER EDITTEXT
 
             @Override
             public void insertUpdate(DocumentEvent e) {
-                if (g != null) {
+                if (g != null) { // IF NOT GRAPH WINDOW CREATED DONT DO NOTHING
                     try {
                         //TEXTO MODIFICADO
                         int last = console.getLineCount() - 1;
-                        String[] lines = console.getText().split("\\n");;
-                        g.updateData(lines[last - 1]);
+                        String[] lines = console.getText().split("\\n");
+                        g.updateData(lines[last - 1], sensorNumber);
                     } catch (InterruptedException ex) {
                         Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -93,9 +104,10 @@ public class MainFrame extends javax.swing.JFrame {
         d_name = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         d_addr = new javax.swing.JLabel();
+        label1 = new java.awt.Label();
+        sensor = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Bluetooth Server");
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setForeground(java.awt.Color.white);
         setResizable(false);
@@ -148,6 +160,13 @@ public class MainFrame extends javax.swing.JFrame {
         d_addr.setFont(new java.awt.Font("Tahoma", 2, 14)); // NOI18N
         d_addr.setText("00:00:00:00:00.");
 
+        label1.setText("label1");
+
+        sensor.setFont(new java.awt.Font("Comic Sans MS", 1, 24)); // NOI18N
+        sensor.setForeground(new java.awt.Color(186, 203, 130));
+        sensor.setText("SENSOR");
+        sensor.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -162,10 +181,6 @@ public class MainFrame extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(d_addr, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addComponent(jLabel6)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                    .addComponent(d_name, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(jLabel5)
@@ -175,15 +190,22 @@ public class MainFrame extends javax.swing.JFrame {
                                         .addComponent(jLabel7)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                         .addComponent(s_addr, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addComponent(jLabel1)))
+                                    .addComponent(jLabel1))
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(jLabel6)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(d_name, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel2)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(s_status))))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(102, 102, 102)
-                        .addComponent(jButton1)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 6, Short.MAX_VALUE)
+                        .addGap(100, 100, 100)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(sensor, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButton1))
+                        .addGap(124, 124, 124)))
+                .addGap(10, 10, 10)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 352, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -215,7 +237,9 @@ public class MainFrame extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel6)
                             .addComponent(d_name))
-                        .addGap(61, 61, 61)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(sensor, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
                         .addComponent(jButton1)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -224,10 +248,10 @@ public class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-
-        g = new Grafica("Grafica Tiempo Real");
-        g.showGrafica();
-
+        if (sensorNumber != 0) {
+            g = new Grafica("Grafica Tiempo Real", sensorNumber);
+            g.showGrafica();
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     public void run() {
@@ -264,7 +288,17 @@ public class MainFrame extends javax.swing.JFrame {
     }
 
     public void writeConsole(String s) {
-        this.console.append(s);
+        // SET THE SENSOR ID
+        String delims = "[ ]+";
+        String[] tokens = s.split(delims);
+        if (tokens.length > 5) {
+            sensorNumber = Integer.parseInt(tokens[7]);
+        } else {
+            sensorNumber = Integer.parseInt(tokens[3]);
+        }
+        //ELIMINAR SENSOR
+        String tmp = s.substring(0, s.length() - 7); // ELIMINAMOS INFO SENSOR
+        this.console.append(tmp+"\n");//AÑADIMOS FINAL LINEA
         console.setCaretPosition(console.getDocument().getLength());
     }
 
@@ -275,6 +309,8 @@ public class MainFrame extends javax.swing.JFrame {
         }
         this.d_addr.setText("00:00:00:00:00.");
         this.d_name.setText("DEVICE_NAME");
+        this.sensorNumber = 0;
+        this.g = null;
     }
 
     public void setDevName(String s) {
@@ -291,6 +327,10 @@ public class MainFrame extends javax.swing.JFrame {
 
     public void setServerName(String s) {
         this.s_name.setText(s);
+    }
+
+    public void setSensorName(String s) {
+        this.sensor.setText(s);
     }
 
     public void setStatus(boolean s) {
@@ -315,12 +355,14 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JScrollPane jScrollPane1;
+    private java.awt.Label label1;
     private javax.swing.JLabel s_addr;
     private javax.swing.JLabel s_name;
     private javax.swing.JLabel s_status;
+    private javax.swing.JLabel sensor;
     // End of variables declaration//GEN-END:variables
 
-    public class Grafica {
+    public class Grafica { // ACELEROMETRO
 
         DefaultCategoryDataset data;
         JFreeChart chart;
@@ -330,18 +372,20 @@ public class MainFrame extends javax.swing.JFrame {
         private static final String datosy = "Y";
         private static final String datosz = "Z";
 
-        public Grafica(String title) {
+        public Grafica(String title, int sen) {
             setName("GRAPH THREAD");
             X = Y = Z = 0;
             data = new DefaultCategoryDataset();
-            // X
-            data.addValue(0.0, datosx, Integer.toString(X));
-
-            // Y
-            data.addValue(0.0, datosy, Integer.toString(Y));
-
-            // Z
-            data.addValue(0.0, datosz, Integer.toString(Z));
+            if (sen == ACCELEROMETER || sen == ORIENTATION || sen == GYROSCOPE || sen == MAGNETIC) {
+                // X
+                data.addValue(0.0, datosx, Integer.toString(X));
+                // Y
+                data.addValue(0.0, datosy, Integer.toString(Y));
+                // Z
+                data.addValue(0.0, datosz, Integer.toString(Z));
+            } else {
+                data.addValue(0.0, datosx, Integer.toString(X));
+            }
 
             chart = ChartFactory.createLineChart(
                     title, // chart title
@@ -383,26 +427,32 @@ public class MainFrame extends javax.swing.JFrame {
         }
 
         public void showGrafica() {
-            frame = new ChartFrame("EJEMPLO X", chart);
+            frame = new ChartFrame("GRAPH WINDOW", chart);
             frame.pack();
             frame.setVisible(true);
             frame.setSize(450, 500);
 
         }
 
-        public void updateData(String values) throws InterruptedException {
+        public void updateData(String values, int sen) throws InterruptedException {
             if (values.length() > 1) {
                 String delims = "[ ]+";
                 values = values.replace(",", ".");
                 String[] tokens = values.split(delims);
-                data.addValue(Double.parseDouble(tokens[1]), datosx, Integer.toString(X + 1));
-                data.addValue(Double.parseDouble(tokens[3]), datosy, Integer.toString(Y + 1));
-                data.addValue(Double.parseDouble(tokens[5]), datosz, Integer.toString(Z + 1));
-                X += 1;
-                Y += 1;
-                Z += 1;
+                if (sen == ACCELEROMETER || sen == ORIENTATION || sen == GYROSCOPE || sen == MAGNETIC) {
+                    data.addValue(Double.parseDouble(tokens[1]), datosx, Integer.toString(X + 1));
+                    data.addValue(Double.parseDouble(tokens[3]), datosy, Integer.toString(Y + 1));
+                    data.addValue(Double.parseDouble(tokens[5]), datosz, Integer.toString(Z + 1));
+                    X += 1;
+                    Y += 1;
+                    Z += 1;
+                } else {
+                    data.addValue(Double.parseDouble(tokens[1]), datosx, Integer.toString(X + 1));
+                    X += 1;
+                }
                 //frame.repaint();
             }
         }
     }
+
 }
