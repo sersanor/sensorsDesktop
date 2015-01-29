@@ -115,8 +115,8 @@ public class server extends Thread {
             setState(SERVING);
             // GUI LABELS UPDATE
             GUI.setStatus(true);
-            GUI.setDevName(add);
-            GUI.setDevAdd(name);
+            GUI.setDevName(name);
+            GUI.setDevAdd(add);
         } catch (IOException e) {
             System.err.print(e.toString());
             this.interrupt();
