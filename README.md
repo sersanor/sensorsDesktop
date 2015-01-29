@@ -1,4 +1,4 @@
-#sersanorDesktop
+#sensorsDesktop
 
 This is an Android APP for a college subject called FMM. I go to monitorize Android sensors and send data through Bluetooth for draw it and manage it.
 
